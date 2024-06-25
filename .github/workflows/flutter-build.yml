@@ -8,14 +8,15 @@ on:
         default: true
       upload-tag:
         type: string
-        default: "1.2.6"
+        default: "nightly"
 
 env:
-  WIN_RUST_VERSION: "1.75" # https://github.com/rustdesk/rustdesk/discussions/7503
-  RUST_VERSION: "1.78"
+  WIN_RUST_VERSION: "1.75" # https://github.com/rustdesk/rustdesk/discussions/7503, also 1.78 has ABI change which causes our sciter version not working, https://blog.rust-lang.org/2024/03/30/i128-layout-update.html
+  RUST_VERSION: "1.75" # sciter failed on m1 with 1.78 because of https://blog.rust-lang.org/2024/03/30/i128-layout-update.html
   CARGO_NDK_VERSION: "3.1.2"
   LLVM_VERSION: "15.0.6"
   FLUTTER_VERSION: "3.19.6"
+  ANDROID_FLUTTER_VERSION: "3.13.9" # >= 3.16 is very slow on my android phone, but work well on most of others. We may switch to new flutter after changing to texture rendering (I believe it can solve my problem).
   FLUTTER_RUST_BRIDGE_VERSION: "1.80.1"
   # for arm64 linux because official Dart SDK does not work
   FLUTTER_ELINUX_VERSION: "3.16.9"
@@ -26,7 +27,7 @@ env:
   VERSION: "1.2.6"
   NDK_VERSION: "r26d"
   #signing keys env variable checks
-  
+  ANDROID_SIGNING_KEY: "${{ secrets.ANDROID_SIGNING_KEY }}"
   MACOS_P12_BASE64: "${{ secrets.MACOS_P12_BASE64 }}"
   # To make a custom build with your own servers set the below secret values
   RS_PUB_KEY: "${{ secrets.RS_PUB_KEY }}"
@@ -54,7 +55,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-       
+        job:
+          # - { target: i686-pc-windows-msvc        , os: windows-2022                  }
+          # - { target: x86_64-pc-windows-gnu       , os: windows-2022                  }
+          - { target: x86_64-pc-windows-msvc, os: windows-2022, arch: x86_64 }
+          # - { target: aarch64-pc-windows-msvc, os: windows-2022, arch: aarch64 }
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -141,14 +146,14 @@ jobs:
           path: "./rustdesk"
 
       - name: Upload unsigned
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@master
         with:
           name: rustdesk-unsigned-windows-${{ matrix.job.arch }}         
           path: rustdesk
 
       - name: Sign rustdesk files
-        
+        if: env.UPLOAD_ARTIFACT == 'true' && env.SIGN_BASE_URL != ''
         shell: bash
         run: |
           pip3 install requests argparse
@@ -156,7 +161,7 @@ jobs:
 
       - name: Build self-extracted executable
         shell: bash
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         run: |
           pushd ./libs/portable
           pip3 install -r requirements.txt
@@ -169,7 +174,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build msi
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         run: |
           pushd ./res/msi
           python preprocess.py --arp -d ../../rustdesk
@@ -179,14 +184,14 @@ jobs:
           sha256sum ../../SignOutput/rustdesk-*.msi
 
       - name: Sign rustdesk self-extracted file
-        
+        if: env.UPLOAD_ARTIFACT == 'true' && env.SIGN_BASE_URL != ''
         shell: bash
         run: |
           BASE_URL=${{ secrets.SIGN_BASE_URL }} SECRET_KEY=${{ secrets.SIGN_SECRET_KEY }} python3 res/job.py sign_files ./SignOutput
 
       - name: Publish Release
         uses: softprops/action-gh-release@v1
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         with:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
@@ -203,7 +208,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-       
+        job:
+          # - { target: i686-pc-windows-msvc        , os: windows-2022                  }
+          # - { target: x86_64-pc-windows-gnu       , os: windows-2022                  }
+          - { target: i686-pc-windows-msvc, os: windows-2022, arch: x86 }
+          # - { target: aarch64-pc-windows-msvc, os: windows-2022 }
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -279,7 +288,7 @@ jobs:
           fi
 
       - name: Sign rustdesk files
-        
+        if: env.UPLOAD_ARTIFACT == 'true' && env.SIGN_BASE_URL != ''
         shell: bash
         run: |
           pip3 install requests argparse
@@ -298,14 +307,14 @@ jobs:
           tar czf rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.tar.gz rustdesk
 
       - name: Sign rustdesk self-extracted file
-        
+        if: env.UPLOAD_ARTIFACT == 'true' && env.SIGN_BASE_URL != ''
         shell: bash
         run: |
           BASE_URL=${{ secrets.SIGN_BASE_URL }} SECRET_KEY=${{ secrets.SIGN_SECRET_KEY }} python3 res/job.py sign_files ./SignOutput/
 
       - name: Publish Release
         uses: softprops/action-gh-release@v1
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         with:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
@@ -340,7 +349,7 @@ jobs:
           ./build.py --flutter --hwcodec
 
       - name: create unsigned dmg
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         run: |
           CREATE_DMG="$(command -v create-dmg)"
           CREATE_DMG="$(readlink -f "$CREATE_DMG")"
@@ -348,7 +357,7 @@ jobs:
           create-dmg --icon "RustDesk.app" 200 190 --hide-extension "RustDesk.app" --window-size 800 400 --app-drop-link 600 185 rustdesk-${{ env.VERSION }}-arm64.dmg ./flutter/build/macos/Build/Products/Release/RustDesk.app
 
       - name: Upload unsigned macOS app
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@master
         with:
           name: rustdesk-unsigned-macos-arm64
@@ -370,14 +379,14 @@ jobs:
           rcodesign notary-submit --api-key-path ~/.p12/api-key.json  --staple rustdesk-${{ env.VERSION }}.dmg
 
       - name: Rename rustdesk
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         run: |
           for name in rustdesk*??.dmg; do
               mv "$name" "${name%%.dmg}-aarch64.dmg"
           done
 
       - name: Publish DMG package
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
@@ -392,7 +401,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        
+        job:
+          - {
+              arch: aarch64,
+              target: aarch64-apple-ios,
+              os: macos-13,
+            }
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -450,25 +464,25 @@ jobs:
         shell: bash
         run: |
           pushd flutter
-          # flutter build ipa --release --obfuscate --split-debug-info=./split-debug-info
+          # flutter build ipa --release --obfuscate --split-debug-info=./split-debug-info --no-codesign
           # for easy debugging
-          flutter build ipa --release
+          flutter build ipa --release --no-codesign
 
       # - name: Upload Artifacts
-         
-       #  uses: actions/upload-artifact@master
-        # with:
-         #  name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
-          # path: flutter/build/ios/ipa/*.ipa
+      #   # if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
+      #   uses: actions/upload-artifact@master
+      #   with:
+      #     name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
+      #     path: flutter/build/ios/ipa/*.ipa
 
-       #- name: Publish ipa package
-         
-        # uses: softprops/action-gh-release@v1
-         # with:
-           # prerelease: true
-           # tag_name: ${{ env.TAG_NAME }}
-           # files: |
-             # flutter/build/ios/ipa/*.ipa
+      # - name: Publish ipa package
+      #   # if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     prerelease: true
+      #     tag_name: ${{ env.TAG_NAME }}
+      #     files: |
+      #       flutter/build/ios/ipa/*.ipa
 
   build-rustdesk-ios-selfhost:
     #if: ${{ inputs.upload-artifact }}
@@ -506,26 +520,25 @@ jobs:
         shell: bash
         run: |
           pushd flutter
-          # flutter build ipa --release --obfuscate --split-debug-info=./split-debug-info
+          # flutter build ipa --release --obfuscate --split-debug-info=./split-debug-info --no-codesign
           # for easy debugging
-          flutter build ipa --release
+          flutter build ipa --release --no-codesign
 
-       # - name: Upload Artifacts
+      # - name: Upload Artifacts
+      #   # if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
+      #   uses: actions/upload-artifact@master
+      #   with:
+      #     name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
+      #     path: flutter/build/ios/ipa/*.ipa
 
-      
-         # uses: actions/upload-artifact@master
-         # with:
-           # name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
-           # path: flutter/build/ios/ipa/*.ipa
-
-       # - name: Publish ipa package
-         
-         # uses: softprops/action-gh-release@v1
-         # with:
-           # prerelease: true
-           # tag_name: ${{ env.TAG_NAME }}
-           # files: |
-             # flutter/build/ios/ipa/*.ipa
+      # - name: Publish ipa package
+      #   # if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     prerelease: true
+      #     tag_name: ${{ env.TAG_NAME }}
+      #     files: |
+      #       flutter/build/ios/ipa/*.ipa
 
   build-for-macOS:
     name: ${{ matrix.job.target }}
@@ -533,8 +546,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        
-          
+        job:
+          - {
+              target: x86_64-apple-darwin,
+              os: macos-13, #macos-latest or macos-14 use M1 now, https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#:~:text=14%20GB-,macos%2Dlatest%20or%20macos%2D14,-The%20macos%2Dlatestlabel
+              extra-build-args: "",
+              arch: x86_64,
+            }
+          - {
+              target: aarch64-apple-darwin,
+              os: macos-latest,
+              # extra-build-args: "--disable-flutter-texture-render", # disable this for mac, because we see a lot of users reporting flickering both on arm and x64, and we can not confirm if texture rendering has better performance if htere is no vram, https://github.com/rustdesk/rustdesk/issues/6296
+              extra-build-args: "",
+              arch: aarch64,
+            }
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -631,7 +656,7 @@ jobs:
           ./build.py --flutter --hwcodec ${{ matrix.job.extra-build-args }}
 
       - name: create unsigned dmg
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         run: |
           CREATE_DMG="$(command -v create-dmg)"
           CREATE_DMG="$(readlink -f "$CREATE_DMG")"
@@ -639,7 +664,7 @@ jobs:
           create-dmg --icon "RustDesk.app" 200 190 --hide-extension "RustDesk.app" --window-size 800 400 --app-drop-link 600 185 rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg ./flutter/build/macos/Build/Products/Release/RustDesk.app
 
       - name: Upload unsigned macOS app
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@master
         with:
           name: rustdesk-unsigned-macos-${{ matrix.job.arch }}
@@ -664,14 +689,14 @@ jobs:
           rcodesign notary-submit --api-key-path ${{ github.workspace }}/rustdesk.json  --staple rustdesk-${{ env.VERSION }}.dmg
 
       - name: Rename rustdesk
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         run: |
           for name in rustdesk*??.dmg; do
               mv "$name" "${name%%.dmg}-${{ matrix.job.arch }}.dmg"
           done
 
       - name: Publish DMG package
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
@@ -725,10 +750,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        
-           
-            
-            
+        job:
+          - {
+              arch: aarch64,
+              target: aarch64-linux-android,
+              os: ubuntu-20.04,
+              openssl-arch: android-arm64,
+            }
+          - {
+              arch: armv7,
+              target: armv7-linux-androideabi,
+              os: ubuntu-20.04,
+              openssl-arch: android-arm,
+            }
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -778,7 +812,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: "stable"
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: ${{ env.ANDROID_FLUTTER_VERSION }}
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
@@ -819,6 +853,13 @@ jobs:
         with:
           prefix-key: rustdesk-lib-cache-android # TODO: drop '-android' part after caches are invalidated
           key: ${{ matrix.job.target }}
+
+      - name: fix android for flutter 3.13
+        if: $${{ env.ANDROID_FLUTTER_VERSION == '3.13.9' }}
+        run: |
+          sed -i 's/uni_links_desktop/#uni_links_desktop/g' flutter/pubspec.yaml
+          cd flutter/lib
+          find . | grep dart | xargs sed -i 's/textScaler: TextScaler.linear(\(.*\)),/textScaleFactor: \1,/g'
 
       - name: Build rustdesk lib
         env:
@@ -874,11 +915,11 @@ jobs:
 
       - uses: r0adkll/sign-android-release@v1
         name: Sign app APK
-        
+        if: env.ANDROID_SIGNING_KEY != null
         id: sign-rustdesk
         with:
           releaseDirectory: ./signed-apk
-          
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
           alias: ${{ secrets.ANDROID_ALIAS }}
           keyStorePassword: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
@@ -887,14 +928,14 @@ jobs:
           BUILD_TOOLS_VERSION: "30.0.2"
 
       - name: Upload Artifacts
-        
+        if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@master
         with:
           name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
           path: ${{steps.sign-rustdesk.outputs.signedReleaseFile}}
 
       - name: Publish signed apk package
-        
+        if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
@@ -903,7 +944,7 @@ jobs:
             ${{steps.sign-rustdesk.outputs.signedReleaseFile}}
 
       - name: Publish unsigned apk package
-        
+        if: env.ANDROID_SIGNING_KEY == null && env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
@@ -919,8 +960,19 @@ jobs:
       fail-fast: false
       matrix:
         # use a high level qemu-user-static
-        
-        
+        job:
+          - {
+              arch: x86_64,
+              target: x86_64-unknown-linux-gnu,
+              distro: ubuntu18.04,
+              on: ubuntu-20.04,
+            }
+          - {
+              arch: aarch64,
+              target: aarch64-unknown-linux-gnu,
+              distro: ubuntu18.04,
+              on: [self-hosted, Linux, ARM64],
+            }
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -982,7 +1034,7 @@ jobs:
           vcpkgGitCommitId: ${{ env.VCPKG_COMMIT_ID }}
 
       - name: Install vcpkg dependencies
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         run: |
           case ${{ matrix.job.target }} in
             aarch64-unknown-linux-gnu)
@@ -1003,7 +1055,7 @@ jobs:
       - uses: rustdesk-org/run-on-arch-action@amd64-support
         name: Build rustdesk
         id: vcpkg
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         with:
           arch: ${{ matrix.job.arch }}
           distro: ${{ matrix.job.distro }}
@@ -1160,7 +1212,7 @@ jobs:
             done
 
       - name: Publish debian/rpm package
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
@@ -1171,7 +1223,7 @@ jobs:
 
       - name: Upload deb 
         uses: actions/upload-artifact@master
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         with:
           name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.deb
           path: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.deb
@@ -1191,7 +1243,7 @@ jobs:
         if: matrix.job.arch == 'x86_64' && env.UPLOAD_ARTIFACT == 'true'
         uses: rustdesk-org/arch-makepkg-action@master
         with:
-          
+          packages:
           scripts: |
             cd res && HBB=`pwd`/.. FLUTTER=1 makepkg -f
 
@@ -1213,8 +1265,13 @@ jobs:
       fail-fast: false
       matrix:
         # use a high level qemu-user-static
-       
-            
+        job:
+          - {
+              arch: armv7,
+              target: armv7-unknown-linux-gnueabihf,
+              deb-arch: armhf,
+              use-cross: true,
+            }
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -1361,7 +1418,7 @@ jobs:
           done
 
       - name: Publish debian package
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
@@ -1378,10 +1435,14 @@ jobs:
       fail-fast: false
       matrix:
         job:
-          
+          - {
+              target: x86_64-unknown-linux-gnu,
+              arch: x86_64,
+            }
+          - {
               target: aarch64-unknown-linux-gnu,
               arch: aarch64,
-          
+            }
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -1413,7 +1474,7 @@ jobs:
           sudo appimage-builder --skip-tests --recipe ./AppImageBuilder-${{ matrix.job.arch }}.yml
 
       - name: Publish appimage package
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
@@ -1429,10 +1490,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        
-         
-             
-           
+        job:
+          - {
+              target: x86_64-unknown-linux-gnu,
+              distro: ubuntu18.04,
+              on: ubuntu-20.04,
+              arch: x86_64,
+            }
+          - {
+              target: aarch64-unknown-linux-gnu,
+              # try out newer flatpak since error of "error: Nothing matches org.freedesktop.Platform in remote flathub"
+              distro: ubuntu22.04,
+              on: [self-hosted, Linux, ARM64],
+              arch: aarch64,
+            }
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -1502,6 +1573,7 @@ jobs:
             flatpak/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.flatpak
 
   build-rustdesk-web:
+    if: False
     name: build-rustdesk-web
     runs-on: ubuntu-20.04
     strategy:
@@ -1556,7 +1628,7 @@ jobs:
           popd
 
       - name: Publish web
-        
+        if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
