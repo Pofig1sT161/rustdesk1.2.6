@@ -407,7 +407,7 @@ jobs:
               target: aarch64-apple-ios,
               os: macos-13,
             }
-    steps:
+      steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
         with:
