@@ -402,11 +402,11 @@ jobs:
       fail-fast: false
       matrix:
         job:
-          - {
+          
               arch: aarch64,
               target: aarch64-apple-ios,
               os: macos-13,
-            }
+            
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -547,19 +547,13 @@ jobs:
       fail-fast: false
       matrix:
         job:
-          - {
+          
               target: x86_64-apple-darwin,
               os: macos-13, #macos-latest or macos-14 use M1 now, https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#:~:text=14%20GB-,macos%2Dlatest%20or%20macos%2D14,-The%20macos%2Dlatestlabel
-              extra-build-args: "",
+              extra-build-args: ""
               arch: x86_64,
-            }
-          - {
-              target: aarch64-apple-darwin,
-              os: macos-latest,
-              # extra-build-args: "--disable-flutter-texture-render", # disable this for mac, because we see a lot of users reporting flickering both on arm and x64, and we can not confirm if texture rendering has better performance if htere is no vram, https://github.com/rustdesk/rustdesk/issues/6296
-              extra-build-args: "",
-              arch: aarch64,
-            }
+            
+          
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -751,18 +745,18 @@ jobs:
       fail-fast: false
       matrix:
         job:
-          - {
+          
               arch: aarch64,
               target: aarch64-linux-android,
               os: ubuntu-20.04,
               openssl-arch: android-arm64,
-            }
-          - {
-              arch: armv7,
-              target: armv7-linux-androideabi,
-              os: ubuntu-20.04,
-              openssl-arch: android-arm,
-            }
+           
+         # - {
+          #    arch: armv7,
+           #   target: armv7-linux-androideabi,
+            #  os: ubuntu-20.04,
+             # openssl-arch: android-arm,
+            # }
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -927,15 +921,11 @@ jobs:
           # override default build-tools version (29.0.3) -- optional
           BUILD_TOOLS_VERSION: "30.0.2"
 
-      - name: Upload Artifacts
-        - uses: actions/upload-artifact@v4
-             with:
-             # Name of the artifact to upload.
-             # Optional. Default is 'artifact'
+      - name: Upload Artifact
+      - uses: actions/upload-artifact@v4
+        with:
+            
                name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
-
-    # A file, directory or wildcard pattern that describes what to upload
-    # Required.
                path: ./signed-apk
 
         
@@ -967,18 +957,18 @@ jobs:
       matrix:
         # use a high level qemu-user-static
         job:
-          - {
+          
               arch: x86_64,
               target: x86_64-unknown-linux-gnu,
               distro: ubuntu18.04,
               on: ubuntu-20.04,
-            }
-          - {
-              arch: aarch64,
-              target: aarch64-unknown-linux-gnu,
-              distro: ubuntu18.04,
-              on: [self-hosted, Linux, ARM64],
-            }
+            
+      #    - {
+       #       arch: aarch64,
+        #      target: aarch64-unknown-linux-gnu,
+         #     distro: ubuntu18.04,
+          #    on: [self-hosted, Linux, ARM64],
+           # }
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
