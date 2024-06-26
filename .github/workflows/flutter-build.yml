@@ -928,11 +928,17 @@ jobs:
           BUILD_TOOLS_VERSION: "30.0.2"
 
       - name: Upload Artifacts
-        if: 1 == 1
-        uses: actions/upload-artifact@master
-        with:
-          name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
-          path: ./signed-apk
+        - uses: actions/upload-artifact@v4
+             with:
+             # Name of the artifact to upload.
+             # Optional. Default is 'artifact'
+               name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
+
+    # A file, directory or wildcard pattern that describes what to upload
+    # Required.
+               path: ./signed-apk
+
+        
 
       - name: Publish signed apk package
         if: 1 == 1
