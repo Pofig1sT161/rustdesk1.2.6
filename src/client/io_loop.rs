@@ -38,7 +38,7 @@ use hbb_common::{tokio::sync::Mutex as TokioMutex, ResultType};
 use scrap::CodecFormat;
 
 use crate::client::{
-    new_voice_call_request, Client, MediaData, MediaSender, QualityStatus, MILLI1, SEC30,
+    Client, MediaData, MediaSender, QualityStatus, MILLI1, SEC30,
 };
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use crate::common::{self, update_clipboard};
@@ -56,8 +56,8 @@ pub struct Remote<T: InvokeUiSession> {
     receiver: mpsc::UnboundedReceiver<Data>,
     sender: mpsc::UnboundedSender<Data>,
     // Stop sending local audio to remote client.
-    stop_voice_call_sender: Option<std::sync::mpsc::Sender<()>>,
-    voice_call_request_timestamp: Option<NonZeroI64>,
+   // stop_voice_call_sender: Option<std::sync::mpsc::Sender<()>>,
+   // voice_call_request_timestamp: Option<NonZeroI64>,
     read_jobs: Vec<fs::TransferJob>,
     write_jobs: Vec<fs::TransferJob>,
     remove_jobs: HashMap<i32, RemoveJob>,
@@ -107,8 +107,8 @@ impl<T: InvokeUiSession> Remote<T> {
             data_count: Arc::new(AtomicUsize::new(0)),
             frame_count_map,
             video_format: CodecFormat::Unknown,
-            stop_voice_call_sender: None,
-            voice_call_request_timestamp: None,
+           // stop_voice_call_sender: None,
+           // voice_call_request_timestamp: None,
             elevation_requested: false,
             fps_control_map: Default::default(),
             decode_fps_map: decode_fps,
@@ -268,9 +268,9 @@ impl<T: InvokeUiSession> Remote<T> {
                 }
                 log::debug!("Exit io_loop of id={}", self.handler.get_id());
                 // Stop client audio server.
-                if let Some(s) = self.stop_voice_call_sender.take() {
+              /*  if let Some(s) = self.stop_voice_call_sender.take() {
                     s.send(()).ok();
-                }
+                } */
             }
             Err(err) => {
                 self.handler.on_establish_connection_error(err.to_string());
@@ -374,16 +374,16 @@ impl<T: InvokeUiSession> Remote<T> {
             self.handler.job_done(id, file_num);
         }
     }
-
+/*
     fn stop_voice_call(&mut self) {
         let voice_call_sender = std::mem::replace(&mut self.stop_voice_call_sender, None);
         if let Some(stopper) = voice_call_sender {
             let _ = stopper.send(());
         }
     }
-
+*/
     // Start a voice call recorder, records audio and send to remote
-    fn start_voice_call(&mut self) -> Option<std::sync::mpsc::Sender<()>> {
+/*    fn start_voice_call(&mut self) -> Option<std::sync::mpsc::Sender<()>> {
         if self.handler.is_file_transfer() || self.handler.is_port_forward() {
             return None;
         }
@@ -456,7 +456,7 @@ impl<T: InvokeUiSession> Remote<T> {
             None
         }
     }
-
+*/
     async fn handle_msg_from_ui(&mut self, data: Data, peer: &mut Stream) -> bool {
         match data {
             Data::Close => {
@@ -826,7 +826,7 @@ impl<T: InvokeUiSession> Remote<T> {
                 allow_err!(peer.send(&msg).await);
                 self.elevation_requested = true;
             }
-            Data::NewVoiceCall => {
+          /*  Data::NewVoiceCall => {
                 let msg = new_voice_call_request(true);
                 // Save the voice call request timestamp for the further validation.
                 self.voice_call_request_timestamp = Some(
@@ -847,6 +847,7 @@ impl<T: InvokeUiSession> Remote<T> {
                 self.video_sender.send(MediaData::Reset(display)).ok();
             }
             _ => {}
+            */
         }
         true
     }
@@ -1543,6 +1544,7 @@ impl<T: InvokeUiSession> Remote<T> {
                     self.handler
                         .msgbox(&msgbox.msgtype, &msgbox.title, &msgbox.text, &link);
                 }
+/*
                 Some(message::Union::VoiceCallRequest(request)) => {
                     if request.is_connect {
                         // TODO: maybe we will do a voice call from the peer in the future.
@@ -1571,6 +1573,7 @@ impl<T: InvokeUiSession> Remote<T> {
                         }
                     }
                 }
+                */
                 Some(message::Union::PeerInfo(pi)) => {
                     self.handler.set_displays(&pi.displays);
                     self.handler.set_platform_additions(&pi.platform_additions);
