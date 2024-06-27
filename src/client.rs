@@ -2993,8 +2993,8 @@ pub enum Data {
     RecordScreen(bool, usize, i32, i32, String),
     ElevateDirect,
     ElevateWithLogon(String, String),
-    NewVoiceCall,
-    CloseVoiceCall,
+   // NewVoiceCall,
+   // CloseVoiceCall,
     ResetDecoder(Option<usize>),
 }
 
