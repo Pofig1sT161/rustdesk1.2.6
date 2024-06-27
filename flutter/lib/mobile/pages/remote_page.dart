@@ -105,12 +105,12 @@ class _RemotePageState extends State<RemotePage> {
     }
     await keyboardSubscription.cancel();
     removeSharedStates(widget.id);
-    if (isAndroid) {
+   /* if (isAndroid) {
       // Only one client is considered here for now.
       // TODO: take into account the case where there are multiple clients
       gFFI.invokeMethod("on_voice_call_closed");
     }
-  }
+  }*/
 
   // to-do: It should be better to use transparent color instead of the bgColor.
   // But for now, the transparent color will cause the canvas to be white.
@@ -568,7 +568,7 @@ class _RemotePageState extends State<RemotePage> {
           ),
           onPressed: onPressed,
         );
-
+/*
     final isInVoice = [
       VoiceCallStatus.waitingForResponse,
       VoiceCallStatus.connected
@@ -594,6 +594,7 @@ class _RemotePageState extends State<RemotePage> {
               ),
               onPressVoiceCall),
     ];
+    */
     getChild(TTextMenu menu) {
       if (menu.trailingIcon != null) {
         return Row(
