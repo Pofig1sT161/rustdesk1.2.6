@@ -135,6 +135,7 @@ class MainService : Service() {
                     e.printStackTrace()
                 }
             }
+            /*
             "update_voice_call_state" -> {
                 try {
                     val jsonObject = JSONObject(arg1)
@@ -168,6 +169,7 @@ class MainService : Service() {
                     e.printStackTrace()
                 }
             }
+            */
             "stop_capture" -> {
                 Log.d(logTag, "from rust:stop_capture")
                 stopCapture()
@@ -389,7 +391,7 @@ class MainService : Service() {
             imageReader?.surface
         }
     }
-
+/*
     fun onVoiceCallStarted(): Boolean {
         return audioRecordHandle.onVoiceCallStarted(mediaProjection)
     }
@@ -397,7 +399,7 @@ class MainService : Service() {
     fun onVoiceCallClosed(): Boolean {
         return audioRecordHandle.onVoiceCallClosed(mediaProjection)
     }
-
+*/
     fun startCapture(): Boolean {
         if (isStart) {
             return true
@@ -671,7 +673,7 @@ class MainService : Service() {
             .build()
         notificationManager.notify(getClientNotifyID(clientID), notification)
     }
-
+/*
     private fun voiceCallRequestNotification(
         clientID: Int,
         type: String,
@@ -686,7 +688,7 @@ class MainService : Service() {
             .build()
         notificationManager.notify(getClientNotifyID(clientID), notification)
     }
-
+*/
     private fun getClientNotifyID(clientID: Int): Int {
         return clientID + NOTIFY_ID_OFFSET
     }
