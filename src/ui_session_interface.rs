@@ -1267,6 +1267,7 @@ impl<T: InvokeUiSession> Session<T> {
     }
 
     #[inline]
+    /*
     pub fn request_voice_call(&self) {
         self.send(Data::NewVoiceCall);
     }
@@ -1275,7 +1276,7 @@ impl<T: InvokeUiSession> Session<T> {
     pub fn close_voice_call(&self) {
         self.send(Data::CloseVoiceCall);
     }
-
+*/
     pub fn send_selected_session_id(&self, sid: String) {
         if let Ok(sid) = sid.parse::<u32>() {
             self.lc.write().unwrap().selected_windows_session_id = Some(sid);
@@ -1382,10 +1383,10 @@ pub trait InvokeUiSession: Send + Sync + Clone + 'static + Sized + Default {
     fn cancel_msgbox(&self, tag: &str);
     fn switch_back(&self, id: &str);
     fn portable_service_running(&self, running: bool);
-    fn on_voice_call_started(&self);
-    fn on_voice_call_closed(&self, reason: &str);
-    fn on_voice_call_waiting(&self);
-    fn on_voice_call_incoming(&self);
+  //  fn on_voice_call_started(&self);
+    // fn on_voice_call_closed(&self, reason: &str);
+    // fn on_voice_call_waiting(&self);
+    // fn on_voice_call_incoming(&self);
     fn get_rgba(&self, display: usize) -> *const u8;
     fn next_rgba(&self, display: usize);
     #[cfg(all(feature = "vram", feature = "flutter"))]
