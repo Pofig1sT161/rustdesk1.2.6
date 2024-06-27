@@ -338,7 +338,8 @@ class FfiModel with ChangeNotifier {
       } else if (name == 'on_url_scheme_received') {
         // currently comes from "_url" ipc of mac and dbus of linux
         onUrlSchemeReceived(evt);
-      } else if (name == 'on_voice_call_waiting') {
+      } /*
+      else if (name == 'on_voice_call_waiting') {
         // Waiting for the response from the peer.
         parent.target?.chatModel.onVoiceCallWaiting();
       } else if (name == 'on_voice_call_started') {
@@ -353,7 +354,8 @@ class FfiModel with ChangeNotifier {
         parent.target?.chatModel.onVoiceCallIncoming();
       } else if (name == 'update_voice_call_state') {
         parent.target?.serverModel.updateVoiceCallState(evt);
-      } else if (name == 'fingerprint') {
+      } */
+      else if (name == 'fingerprint') {
         FingerprintState.find(peerId).value = evt['fingerprint'] ?? '';
       } else if (name == 'plugin_manager') {
         pluginManager.handleEvent(evt);
