@@ -63,10 +63,11 @@ class ChatModel with ChangeNotifier {
 
   RxBool isWindowFocus = true.obs;
   BlockableOverlayState _blockableOverlayState = BlockableOverlayState();
+  /*
   final Rx<VoiceCallStatus> _voiceCallStatus = Rx(VoiceCallStatus.notStarted);
 
   Rx<VoiceCallStatus> get voiceCallStatus => _voiceCallStatus;
-
+*/
   TextEditingController textController = TextEditingController();
   RxInt mobileUnreadSum = 0.obs;
   MessageKey? latestReceivedKey;
@@ -520,7 +521,7 @@ class ChatModel with ChangeNotifier {
       }
     });
   }
-
+/*
   void onVoiceCallWaiting() {
     _voiceCallStatus.value = VoiceCallStatus.waitingForResponse;
   }
@@ -557,3 +558,4 @@ enum VoiceCallStatus {
   // Connection manager only.
   incoming
 }
+*/
