@@ -703,6 +703,7 @@ class _CmControlPanel extends StatelessWidget {
     final showElevation = canElevate &&
         model.showElevation &&
         client.type_() == ClientType.remote;
+    /*
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -868,6 +869,7 @@ class _CmControlPanel extends StatelessWidget {
         )
       ],
     ).marginOnly(bottom: buttonBottomMargin);
+    */
   }
 
   buildDisconnected(BuildContext context) {
@@ -1032,7 +1034,7 @@ class _CmControlPanel extends StatelessWidget {
   void handleSwitchBack(BuildContext context) {
     bind.cmSwitchBack(connId: client.id);
   }
-
+/*
   void handleVoiceCall(bool accept) {
     bind.cmHandleIncomingVoiceCall(id: client.id, accept: accept);
   }
@@ -1041,7 +1043,7 @@ class _CmControlPanel extends StatelessWidget {
     bind.cmCloseVoiceCall(id: client.id);
   }
 }
-
+*/
 void checkClickTime(int id, Function() callback) async {
   var clickCallbackTime = DateTime.now().millisecondsSinceEpoch;
   await bind.cmCheckClickTime(connId: id);
