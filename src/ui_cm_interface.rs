@@ -54,8 +54,8 @@ pub struct Client {
     pub recording: bool,
     pub block_input: bool,
     pub from_switch: bool,
-    pub in_voice_call: bool,
-    pub incoming_voice_call: bool,
+   // pub in_voice_call: bool,
+   //  pub incoming_voice_call: bool,
     #[serde(skip)]
     #[cfg(not(any(target_os = "ios")))]
     tx: UnboundedSender<Data>,
@@ -100,7 +100,7 @@ pub trait InvokeUiCM: Send + Clone + 'static + Sized {
 
     fn show_elevation(&self, show: bool);
 
-    fn update_voice_call_state(&self, client: &Client);
+  //  fn update_voice_call_state(&self, client: &Client);
 
     fn file_transfer_log(&self, action: &str, log: &str);
 }
@@ -156,8 +156,8 @@ impl<T: InvokeUiCM> ConnectionManager<T> {
             from_switch,
             #[cfg(not(any(target_os = "ios")))]
             tx,
-            in_voice_call: false,
-            incoming_voice_call: false,
+           //  in_voice_call: false,
+           //  incoming_voice_call: false,
         };
         CLIENTS
             .write()
@@ -222,6 +222,7 @@ impl<T: InvokeUiCM> ConnectionManager<T> {
     }
 
     #[cfg(not(target_os = "ios"))]
+    /*
     fn voice_call_started(&self, id: i32) {
         if let Some(client) = CLIENTS.write().unwrap().get_mut(&id) {
             client.incoming_voice_call = false;
@@ -247,6 +248,7 @@ impl<T: InvokeUiCM> ConnectionManager<T> {
             self.ui_handler.update_voice_call_state(client);
         }
     }
+    */
 }
 
 #[inline]
@@ -468,6 +470,7 @@ impl<T: InvokeUiCM> IpcTaskRunner<T> {
                                 Data::DataPortableService(ipc::DataPortableService::CmShowElevation(show)) => {
                                     self.cm.show_elevation(show);
                                 }
+                                /*
                                 Data::StartVoiceCall => {
                                     self.cm.voice_call_started(self.conn_id);
                                 }
@@ -477,6 +480,7 @@ impl<T: InvokeUiCM> IpcTaskRunner<T> {
                                 Data::CloseVoiceCall(reason) => {
                                     self.cm.voice_call_closed(self.conn_id, reason.as_str());
                                 }
+                                */
                                 _ => {
 
                                 }
@@ -658,6 +662,7 @@ pub async fn start_listen<T: InvokeUiCM>(
             Some(Data::Close) => {
                 break;
             }
+            /*
             Some(Data::StartVoiceCall) => {
                 cm.voice_call_started(current_id);
             }
@@ -667,6 +672,7 @@ pub async fn start_listen<T: InvokeUiCM>(
             Some(Data::CloseVoiceCall(reason)) => {
                 cm.voice_call_closed(current_id, reason.as_str());
             }
+            */
             None => {
                 break;
             }
@@ -963,6 +969,7 @@ pub fn elevate_portable(_id: i32) {
 
 #[cfg(any(target_os = "android", target_os = "ios", feature = "flutter"))]
 #[inline]
+/*
 pub fn handle_incoming_voice_call(id: i32, accept: bool) {
     if let Some(client) = CLIENTS.read().unwrap().get(&id) {
         // Not handled in iOS yet.
@@ -980,3 +987,4 @@ pub fn close_voice_call(id: i32) {
         allow_err!(client.tx.send(Data::CloseVoiceCall("".to_owned())));
     };
 }
+*/
