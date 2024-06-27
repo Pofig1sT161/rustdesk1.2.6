@@ -324,7 +324,7 @@ class MainActivity : FlutterActivity() {
         result.put("codecs", codecArray)
         FFI.setCodecInfo(result.toString())
     }
-
+/*
     private fun onVoiceCallStarted() {
         var ok = false
         mainService?.let {
@@ -364,7 +364,7 @@ class MainActivity : FlutterActivity() {
             Log.d(logTag, "onVoiceCallClosed success")
         }
     }
-
+*/
     override fun onStop() {
         super.onStop()
         val disableFloatingWindow = FFI.getLocalOption("disable-floating-window") == "Y"
