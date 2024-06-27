@@ -312,7 +312,7 @@ impl InvokeUiSession for SciterHandler {
     fn switch_back(&self, _id: &str) {}
 
     fn portable_service_running(&self, _running: bool) {}
-
+/*
     fn on_voice_call_started(&self) {
         self.call("onVoiceCallStart", &make_args!());
     }
@@ -328,7 +328,7 @@ impl InvokeUiSession for SciterHandler {
     fn on_voice_call_incoming(&self) {
         self.call("onVoiceCallIncoming", &make_args!());
     }
-
+*/
     /// RGBA is directly rendered by [on_rgba]. No need to store the rgba for the sciter ui.
     fn get_rgba(&self, _display: usize) -> *const u8 {
         std::ptr::null()
@@ -490,8 +490,8 @@ impl sciter::EventHandler for SciterSession {
         fn alternative_codecs();
         fn change_prefer_codec();
         fn restart_remote_device();
-        fn request_voice_call();
-        fn close_voice_call();
+     //   fn request_voice_call();
+       // fn close_voice_call();
         fn version_cmp(String, String);
         fn set_selected_windows_session_id(String);
     }
