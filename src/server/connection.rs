@@ -15,7 +15,7 @@ use crate::platform::WallPaperRemover;
 use crate::portable_service::client as portable_client;
 use crate::{
     client::{
-        new_voice_call_request, new_voice_call_response, start_audio_thread, MediaData, MediaSender,
+        start_audio_thread, MediaData, MediaSender,
     },
     common::{get_default_sound_input, set_sound_input},
     display_service, ipc, privacy_mode, video_service, VERSION,
@@ -217,8 +217,8 @@ pub struct Connection {
     #[cfg(windows)]
     portable: PortableState,
     from_switch: bool,
-    voice_call_request_timestamp: Option<NonZeroI64>,
-    audio_input_device_before_voice_call: Option<String>,
+    // voice_call_request_timestamp: Option<NonZeroI64>,
+    // audio_input_device_before_voice_call: Option<String>,
     options_in_login: Option<OptionMessage>,
     #[cfg(not(any(target_os = "ios")))]
     pressed_modifiers: HashSet<rdev::Key>,
@@ -366,8 +366,8 @@ impl Connection {
             portable: Default::default(),
             from_switch: false,
             audio_sender: None,
-            voice_call_request_timestamp: None,
-            audio_input_device_before_voice_call: None,
+            // voice_call_request_timestamp: None,
+            // audio_input_device_before_voice_call: None,
             options_in_login: None,
             #[cfg(not(any(target_os = "ios")))]
             pressed_modifiers: Default::default(),
@@ -558,6 +558,7 @@ impl Connection {
                             msg.set_misc(misc);
                             conn.send(msg).await;
                         }
+                        /*
                         ipc::Data::VoiceCallResponse(accepted) => {
                             conn.handle_voice_call(accepted).await;
                         }
@@ -568,6 +569,7 @@ impl Connection {
                             let msg = new_voice_call_request(false);
                             conn.send(msg).await;
                         }
+                        */
                         _ => {}
                     }
                 },
