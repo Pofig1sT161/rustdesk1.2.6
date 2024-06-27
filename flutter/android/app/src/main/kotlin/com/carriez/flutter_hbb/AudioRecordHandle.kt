@@ -25,7 +25,7 @@ class AudioRecordHandle(private var context: Context, private var isVideoStart: 
     private var minBufferSize = 0
     private var audioRecordStat = false
     private var audioThread: Thread? = null
-
+/*
     @RequiresApi(Build.VERSION_CODES.M)
     fun createAudioRecorder(inVoiceCall: Boolean, mediaProjection: MediaProjection?): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -198,3 +198,4 @@ class AudioRecordHandle(private var context: Context, private var isVideoStart: 
         audioThread?.join()
     }
 }
+*/
