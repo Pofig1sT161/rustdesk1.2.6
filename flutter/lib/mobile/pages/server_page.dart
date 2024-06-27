@@ -643,8 +643,8 @@ class ConnectionManager extends StatelessWidget {
                   client.authorized
                       ? _buildDisconnectButton(client)
                       : _buildNewConnectionHint(serverModel, client),
-                  if (client.incomingVoiceCall && !client.inVoiceCall)
-                    ..._buildNewVoiceCallHint(context, serverModel, client),
+               /*   if (client.incomingVoiceCall && !client.inVoiceCall)
+                    ..._buildNewVoiceCallHint(context, serverModel, client), */
                 ])))
             .toList());
   }
@@ -660,6 +660,7 @@ class ConnectionManager extends StatelessWidget {
       label: Text(translate("Disconnect")),
     );
     final buttons = [disconnectButton];
+    /*
     if (client.inVoiceCall) {
       buttons.insert(
         0,
@@ -675,7 +676,7 @@ class ConnectionManager extends StatelessWidget {
         ),
       );
     }
-
+*/
     if (buttons.length == 1) {
       return Container(
         alignment: Alignment.centerRight,
@@ -705,7 +706,7 @@ class ConnectionManager extends StatelessWidget {
             }),
     ]);
   }
-
+/*
   List<Widget> _buildNewVoiceCallHint(
       BuildContext context, ServerModel serverModel, Client client) {
     return [
@@ -728,7 +729,7 @@ class ConnectionManager extends StatelessWidget {
               }),
       ])
     ];
-  }
+  }  */
 }
 
 class PaddingCard extends StatelessWidget {
