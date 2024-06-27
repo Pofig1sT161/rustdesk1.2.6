@@ -1,6 +1,6 @@
 use hbb_common::{
     get_time,
-    message_proto::{Message, VoiceCallRequest, VoiceCallResponse},
+    message_proto::{Message},
 };
 use scrap::CodecFormat;
 use std::collections::HashMap;
@@ -16,7 +16,7 @@ pub struct QualityStatus {
 }
 
 #[inline]
-pub fn new_voice_call_request(is_connect: bool) -> Message {
+/*pub fn new_voice_call_request(is_connect: bool) -> Message {
     let mut req = VoiceCallRequest::new();
     req.is_connect = is_connect;
     req.req_timestamp = get_time();
@@ -24,7 +24,8 @@ pub fn new_voice_call_request(is_connect: bool) -> Message {
     msg.set_voice_call_request(req);
     msg
 }
-
+*/
+/*
 #[inline]
 pub fn new_voice_call_response(request_timestamp: i64, accepted: bool) -> Message {
     let mut resp = VoiceCallResponse::new();
@@ -35,3 +36,4 @@ pub fn new_voice_call_response(request_timestamp: i64, accepted: bool) -> Messag
     msg.set_voice_call_response(resp);
     msg
 }
+*/
