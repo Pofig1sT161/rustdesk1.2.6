@@ -487,7 +487,7 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
     toolbarItems.add(_KeyboardMenu(id: widget.id, ffi: widget.ffi));
     if (!isWeb) {
       toolbarItems.add(_ChatMenu(id: widget.id, ffi: widget.ffi));
-      toolbarItems.add(_VoiceCallMenu(id: widget.id, ffi: widget.ffi));
+     // toolbarItems.add(_VoiceCallMenu(id: widget.id, ffi: widget.ffi));
     }
     if (!isWeb) toolbarItems.add(_RecordMenu());
     toolbarItems.add(_CloseMenu(id: widget.id, ffi: widget.ffi));
@@ -1912,7 +1912,7 @@ class _ChatMenuState extends State<_ChatMenu> {
         ffi: widget.ffi,
         color: _ToolbarTheme.blueColor,
         hoverColor: _ToolbarTheme.hoverBlueColor,
-        menuChildrenGetter: () => [textChat(), voiceCall()]);
+        menuChildrenGetter: () => [textChat()]);
   }
 
   textChat() {
@@ -1934,7 +1934,7 @@ class _ChatMenuState extends State<_ChatMenu> {
           widget.ffi.chatModel.toggleChatOverlay(chatInitPos: initPos);
         });
   }
-
+/*
   voiceCall() {
     return MenuButton(
       child: Text(translate('Voice call')),
@@ -1943,8 +1943,9 @@ class _ChatMenuState extends State<_ChatMenu> {
           bind.sessionRequestVoiceCall(sessionId: widget.ffi.sessionId),
     );
   }
+  */
 }
-
+/*
 class _VoiceCallMenu extends StatelessWidget {
   final String id;
   final FFI ffi;
@@ -2021,7 +2022,7 @@ class _VoiceCallMenu extends StatelessWidget {
     );
   }
 }
-
+*/
 class _RecordMenu extends StatelessWidget {
   const _RecordMenu({Key? key}) : super(key: key);
 
