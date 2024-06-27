@@ -394,7 +394,7 @@ jobs:
           files: |
             rustdesk*-aarch64.dmg
 
-  build-rustdesk-ios:
+ /* build-rustdesk-ios:
     if: ${{ inputs.upload-artifact }}
     name: build rustdesk ios ipa
     runs-on: ${{ matrix.job.os }}
@@ -742,7 +742,7 @@ jobs:
 
   generate-bridge-linux:
     uses: ./.github/workflows/bridge.yml
-
+*/
   build-rustdesk-android:
     needs: [generate-bridge-linux]
     name: build rustdesk android apk ${{ matrix.job.target }}
