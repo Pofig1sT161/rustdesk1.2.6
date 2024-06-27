@@ -1291,7 +1291,7 @@ pub fn session_new_rdp(session_id: SessionID) {
         session.new_rdp();
     }
 }
-
+/*
 pub fn session_request_voice_call(session_id: SessionID) {
     if let Some(session) = sessions::get_session_by_session_id(&session_id) {
         session.request_voice_call();
@@ -1311,7 +1311,7 @@ pub fn cm_handle_incoming_voice_call(id: i32, accept: bool) {
 pub fn cm_close_voice_call(id: i32) {
     crate::ui_cm_interface::close_voice_call(id);
 }
-
+*/
 pub fn main_get_last_remote_id() -> String {
     LocalConfig::get_remote_id()
 }
